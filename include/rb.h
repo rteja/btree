@@ -5,6 +5,7 @@ typedef struct node node;
 
 #define MAGIC_STR "RBFS"
 #define REC_VALID "RV"
+#define REC_INVALID "RI"
 #define REC_START 0x1
 
 
@@ -23,15 +24,17 @@ class Tree
      int nrecords;
      bool sanity();
      void frewind();
-     unsigned int fmalloc();
-     void ffree(unsigned int rpos);
-     bool fgotorec(unsigned int record);
-     bool fgetrec(unsigned int n, node *rec);
-     
-     bool isred(unsigned int rec);
-     unsigned int rotateleft(unsigned int rec);
-     unsigned int rotateright(unsigned int rec);
-     void flipcolors(unsigned int rec);
+     int fmalloc();
+     void ffree(int recpos);
+     bool fgotorec(int recpos);
+     bool fgetrec(int recpos, node *rec);
+
+     bool fwriterec(int recpos, node *rec);    
+ 
+     bool isred(unsigned int recpos);
+     unsigned int rotateleft(unsigned int recpos);
+     unsigned int rotateright(unsigned int recpos);
+     void flipcolors(unsigned int recpos);
 
 public:
      node *root;

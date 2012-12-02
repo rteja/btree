@@ -74,10 +74,19 @@ void Tree::frewind()
      fseek(fp, sizeof(int), SEEK_CUR);
 }
 
-bool Tree::fgotorec(unsigned int rec)
+bool Tree::fgotorec(int rec)
 {
      if (rec == 0 || nrecords == 0)
           return false;
+
+     if (rec == -1)
+     {
+	  fseek(fp, 0, SEEK_END);
+	  return false;
+     }
+
+     if (rec < 0)
+	  return false;
 
      frewind();
 
@@ -91,7 +100,7 @@ bool Tree::fgotorec(unsigned int rec)
      return true;
 }
 
-bool Tree::fgetrec(unsigned int rec, node *n)
+bool Tree::fgetrec(int rec, node *n)
 {
      
      if (!fgotorec(rec))
@@ -101,6 +110,28 @@ bool Tree::fgetrec(unsigned int rec, node *n)
      fseek(fp, (-1) * (sizeof(node) + strlen(REC_VALID) * sizeof(char)), SEEK_CUR);
      return true;
 }
+
+bool Tree::fwriterec(int rec, node *n)
+{     
+     fgotorec(rec);
+     
+     if (rec < 0 && rec != -1)
+	  return false;
+     
+     if (rec != -1)
+	  fseek(fp, (-1) * (strlen(REC_VALID) * sizeof(char)), SEEK_CUR);
+
+     fwrite(REC_VALID, sizeof(char), strlen(REC_VALID), fp);
+     fwrite(n, sizeof(node), 1, fp);
+     fseek(fp, (-1) * (sizeof(node) + strlen(REC_VALID) * sizeof(char)), SEEK_CUR);
+     return true;	  
+}
+
+int Tree::fmalloc()
+{
+     return -1;
+}
+
 
 bool Tree::Search(int key, char *value)
 {
@@ -144,12 +175,9 @@ unsigned int Tree::rotateleft(unsigned int rec)
      x.left = rightpos;
      x.coloured = h.coloured;
      h.coloured = true;
-
-     fgotorec(rec);
-     fwrite(&x, sizeof(node), 1, fp);
-
-     fgotorec(rightpos);
-     fwrite(&h, sizeof(node), 1, fp);
+     
+     fwriterec(rec, &x);
+     fwriterec(rightpos, &h);
 
      return rec;
      
@@ -167,13 +195,9 @@ unsigned int Tree::rotateright(unsigned int rec)
      x.coloured = h.coloured;
      h.coloured = true;
 
-     
-     fgotorec(rec);
-     fwrite(&x, sizeof(node), 1, fp);
+     fwriterec(rec, &x);
+     fwriterec(leftpos, &h);
 
-     fgotorec(leftpos);
-     fwrite(&h, sizeof(node), 1, fp);
-    
      return rec;
 }
 
@@ -186,18 +210,13 @@ void Tree::flipcolors(unsigned int rec)
      
      fgetrec(n.left, &p);
      p.coloured = false;
-     fseek(fp, sizeof(char) * strlen(REC_VALID), SEEK_CUR);
-     fwrite(&p, sizeof(node), 1, fp);
-     
+     fwriterec(n.left, &p);
 
      fgetrec(n.right, &p);
      p.coloured = false;
-     fseek(fp, sizeof(char) * strlen(REC_VALID), SEEK_CUR);
-     fwrite(&p, sizeof(node), 1, fp);
-
-     fgotorec(rec);
-     fwrite(&n, sizeof(node), 1, fp);
-       
+     fwriterec(n.right, &p);
+     fwriterec(rec, &n);
+     
      return;
 }
 
@@ -235,33 +254,29 @@ void Tree::Insert(int key, char *value)
      {
 	  nrecords++;
 	  node n;
-	  
+	 
+	  int lastrec = (pathTrace.size()) ? pathTrace.back() : -1;
 	  
 	  char valid[3];
 	  fread(valid, sizeof(char), strlen(REC_VALID), fp);
 	  if (!feof(fp) && memcmp(valid, REC_VALID, sizeof(char) * strlen(REC_VALID)))
-	  {	       
-	       fread(&n, sizeof(node), 1, fp);
+	  {
+	       fgetrec(lastrec, &n);
 	       n.key = key;
 	       n.coloured = true;
 	       /* change the value ptr also */
-	       fseek(fp, (-1) * (sizeof(node) + strlen(REC_VALID) * sizeof(char)), SEEK_CUR);
-	       fwrite(REC_VALID, sizeof(char), strlen(REC_VALID), fp);
-	       fwrite(&n, sizeof(node), 1, fp);
-	       fseek(fp, (-1) * (sizeof(node) + strlen(REC_VALID) * sizeof(char)), SEEK_CUR);
+	       fwriterec(lastrec, &n);
 	  }
 	  else if (!feof(fp))
-	  {
-	       fread(&n, sizeof(node), 1, fp);
+	  {	       	   
+	       fgetrec(lastrec, &n);
 
 	       if (n.key > key)
 		    n.left = nrecords;
 	       else
 		    n.right = nrecords;
 	       
-	       fseek(fp, (-1) * sizeof(node), SEEK_CUR);
-	       fwrite(&n, sizeof(node), 1, fp);
-	       fseek(fp, 0, SEEK_END);
+	       fwriterec(lastrec, &n);
 	       
 	       n.key = key;
 	       n.left = 0;
@@ -269,8 +284,8 @@ void Tree::Insert(int key, char *value)
 	       /* work for value_ptr */
 	       n.value_ptr = 0;
 	       n.coloured = true;
-	       fwrite(REC_VALID, sizeof(char), strlen(REC_VALID), fp);
-	       fwrite(&n, sizeof(node), 1, fp);	       
+	       fwriterec(fmalloc(), &n);
+
 	  }
 	  else if (feof(fp))
 	  {
@@ -280,9 +295,8 @@ void Tree::Insert(int key, char *value)
 	       /* work for value_ptr */
 	       n.value_ptr = 0;
 	       n.coloured = true;
-               fwrite(REC_VALID, sizeof(char), strlen(REC_VALID), fp);
-               fwrite(&n, sizeof(node), 1, fp);
-
+	       
+	       fwriterec(fmalloc(), &n);
 	  }
 	  
 	  
@@ -295,7 +309,7 @@ void Tree::Insert(int key, char *value)
 		    current = rotateleft(current);
 	       
 	       node p; 
-	       fgetrec(current, &n);
+
 	       fgetrec(n.left, &p);	       
 	       
 	       if (isred(n.left) && isred(p.left))

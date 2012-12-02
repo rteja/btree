@@ -26,25 +26,22 @@ int main()
      if (n < 0)
      {
 	printf("Invalid input.\n");
-	exit(1);
+	//exit(1);
      }
+
 
      for (i = 0; i < n; i++)
      {
-	/*
-     	rb.Insert(0, str);
-     	rb.Insert(1, str);
-     	rb.Insert(2, str);
-     	rb.Insert(3, str);
-	*/
+	
 	int elm;
-	printf("enter element:%d", i+1);
+	printf("enter element:#%d: ", i+1);
 	scanf("%d", &elm);
 	rb.Insert(elm, str);
      }
 
+
      printf("Keys..\n");
      rb.PrintKeys(1);
-     printf("Keys stored in file rbfs.bin\n");
+     printf("\n stored in file rbfs.bin\n");
      return 1;
 }
