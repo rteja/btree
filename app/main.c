@@ -8,16 +8,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "rb.h"
+#include "btree.h"
 
 int main()
 {
-     char fileName[] = "rbfs.bin";
+     char fileName[] = "btfs.bin";
      char str[] = "trial";
 
-     Tree rb(fileName);
+     Tree bt(fileName);
 
-     printf("RED BLACK TREE - Secondary storage implementation\n");
+     printf("BINARY TREE - Secondary storage implementation\n");
      printf("Enter elements into the tree...\n");
      printf("Enter number of elements:");
      int i, n;
@@ -36,12 +36,12 @@ int main()
 	int elm;
 	printf("enter element:#%d: ", i+1);
 	scanf("%d", &elm);
-	rb.Insert(elm, str);
+	bt.Insert(elm, str);
      }
 
 
      printf("Keys..\n");
-     rb.PrintKeys(1);
-     printf("\n stored in file rbfs.bin\n");
+     bt.PrintKeys();
+     printf("\n stored in file btfs.bin\n");
      return 1;
 }
