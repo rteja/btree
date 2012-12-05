@@ -39,7 +39,6 @@ int main()
 	bt.Insert(elm, str);
      }
 
-
      printf("Keys..\n");
      bt.PrintKeys();
      printf("\n stored in file btfs.bin\n");
