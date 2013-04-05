@@ -5,3 +5,17 @@ ASSIGNMENT: B-TREE (INSERTION AND DELETION) - Implemented in Secondary Storage.
 Compilation:
 Navigate to "/run" directory and execute "compile.sh"
 
+Working:
+# Running the program will create a file "btfs.bin" which is a binary file that stores the Tree.
+# To list the keys stored in the file, the input for new elements to be entered as "0".
+
+
+Structure of the file:
+
+BTFS
+<No. of Records>
+<No. of tNodes>
+<Node no. of the root>
+###Rest of the file contains Nodes###
+
+File is not ascii file, hexdump of the file can be seen using "xxd btfs.bin"
