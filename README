@@ -1,6 +1,5 @@
 NAME: RAGHU TEJA BOGGAVARAPU
-ROLL: MTC-1218
-ASSIGNMENT: B-TREE (INSERTION AND DELETION) - Implemented in Secondary Storage.
+PROJECT: B-TREE (INSERTION AND DELETION) - Implemented in Secondary Storage.
 
 Compilation:
 Navigate to "/run" directory and execute "compile.sh"
